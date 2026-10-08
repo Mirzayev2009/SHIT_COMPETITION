@@ -30,7 +30,7 @@ export function ResultsDashboard({ analysis, document, language, mode, onReset }
 
   function inspectSource(quote?: string) {
     setSelectedQuote(quote ?? null);
-    if (window.matchMedia("(max-width: 959px)").matches) dialogRef.current?.showModal();
+    if (window.matchMedia("(max-width: 1023px)").matches) dialogRef.current?.showModal();
   }
 
   function toggleAction(id: string) {

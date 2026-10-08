@@ -74,6 +74,8 @@ The Node tests cover quotation verification, Unicode and whitespace preservation
 
 For a demonstration, load the sample, create the map, inspect an appointment source, switch languages, review the scheduling uncertainty, complete the quiz, copy questions, print, and reset. Check narrow mobile layouts and keyboard interaction as well as desktop.
 
+The responsive pass was browser-checked at 320, 390, 768, 1024, and 1440 pixels in all three languages across the landing, input, and results screens: 45 checks with no horizontal document overflow. See [the browser verification notes](qa/README.md) and screenshots in `qa/`. The production build, strict TypeScript check, and ESLint passed; 20 source/API tests passed with mocked provider responses. Physical iOS/Android devices and a paid live provider request were not tested.
+
 ## Deploy to Vercel
 
 1. Push the project to a Git repository and import it into Vercel as a Next.js project.

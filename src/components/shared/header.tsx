@@ -16,7 +16,7 @@ export function Header({ language, onLanguageChange, workspace = false, disabled
     <div className="header-inner"><Logo/>
       {!workspace && <nav className="desktop-nav" aria-label="Main"><a href="#how-it-works">{t.howItWorks}</a><a href="#features">{t.features}</a></nav>}
       <div className="header-actions"><LanguageSelector language={language} onChange={onLanguageChange} disabled={disabled} id="header-language"/>
-        {workspace ? <Link className="home-link" href={`/?lang=${language}`}><ArrowLeft size={15}/><span>{t.backHome}</span></Link> : <Button asChild size="sm" className="header-app"><Link href={`/app?lang=${language}`}>{t.openApp}<ArrowRight size={15}/></Link></Button>}
+        {workspace ? <Link className="home-link" href={`/?lang=${language}`} aria-label={t.backHome}><ArrowLeft size={15}/><span>{t.backHome}</span></Link> : <Button asChild size="sm" className="header-app"><Link href={`/app?lang=${language}`}>{t.openApp}<ArrowRight size={15}/></Link></Button>}
         {!workspace && <button className="mobile-menu icon-button" aria-label={menuOpen ? t.close : t.navMenu} aria-expanded={menuOpen} aria-controls="mobile-nav" onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X size={20}/> : <Menu size={20}/>}</button>}
       </div>
     </div>

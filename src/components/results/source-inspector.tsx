@@ -27,16 +27,35 @@ export function SourceDocument({ document, quote }: { document: string; quote: s
 export function SourceInspector({ document, quote, language, mode, onClear, dialogRef }: SourceInspectorProps) {
   const t = ui[language];
   const sourceRef = useRef<HTMLDivElement>(null);
+  const dialogSourceRef = useRef<HTMLDivElement>(null);
   const matched = !!quote && document.includes(quote);
 
   useEffect(() => {
-    const container = sourceRef.current;
-    const mark = container?.querySelector<HTMLElement>("mark");
-    if (container && mark) {
-      const top = mark.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
-      container.scrollTo({ top: Math.max(0, top - 50), behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth";
+
+    function scrollToSource() {
+      for (const container of [sourceRef.current, dialogSourceRef.current]) {
+        if (!container?.clientHeight) continue;
+        const mark = container.querySelector<HTMLElement>("mark");
+        const top = mark ? mark.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop : 0;
+        container.scrollTo({ top: Math.max(0, top - 24), behavior });
+      }
     }
-  }, [quote]);
+
+    let frame = window.requestAnimationFrame(scrollToSource);
+    function updateLayout() {
+      if (desktop.matches) dialogRef.current?.close();
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(scrollToSource);
+    }
+
+    desktop.addEventListener("change", updateLayout);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      desktop.removeEventListener("change", updateLayout);
+    };
+  }, [quote, document, dialogRef]);
 
   function closeDialog() {
     dialogRef.current?.close();
@@ -67,11 +86,15 @@ export function SourceInspector({ document, quote, language, mode, onClear, dial
       </aside>
       <dialog ref={dialogRef} className="care-source-dialog" aria-labelledby="care-source-dialog-title" onClick={(event) => { if (event.target === event.currentTarget) closeDialog(); }}>
         <div className="care-dialog-inner">
-          <div className="care-dialog-grip" aria-hidden="true" />
-          <div className="care-dialog-heading"><h2 id="care-source-dialog-title">{t.sourceTitle}</h2><button type="button" className="icon-button" aria-label={t.close} onClick={closeDialog}><X size={20} /></button></div>
-          <p className="care-dialog-description">{t.sourceDescription}</p>
-          {matched && <div className="care-source-match"><div className="care-source-match-title"><Link2 size={14} aria-hidden="true" />{t.sourceMatched}</div><blockquote>{quote}</blockquote></div>}
-          <SourceDocument document={document} quote={quote} />
+          <div className="care-dialog-header">
+            <div className="care-dialog-grip" aria-hidden="true" />
+            <div className="care-dialog-heading"><h2 id="care-source-dialog-title">{t.sourceTitle}</h2><button type="button" className="icon-button" aria-label={t.close} onClick={closeDialog}><X size={20} /></button></div>
+            <p className="care-dialog-description">{t.sourceDescription}</p>
+          </div>
+          <div className="care-dialog-scroll" ref={dialogSourceRef} tabIndex={0} role="region" aria-label={t.sourceOriginal}>
+            {matched && <div className="care-source-match"><div className="care-source-match-title"><Link2 size={14} aria-hidden="true" /><span>{t.sourceMatched}</span></div><blockquote>{quote}</blockquote></div>}
+            <SourceDocument document={document} quote={quote} />
+          </div>
           <button type="button" className="button button-secondary care-dialog-back" onClick={closeDialog}><ArrowLeft size={16} aria-hidden="true" />{t.sourceBack}</button>
         </div>
       </dialog>

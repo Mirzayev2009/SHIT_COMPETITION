@@ -51,12 +51,27 @@ export function Workspace() {
       else {
         const response = await fetch("/api/analyze", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text, language: nextLanguage, consent: true }), signal: abort.signal });
         const data = await response.json();
-        if (!response.ok) { if (data.code === "NOT_CONFIGURED") { setLiveAvailable(false); throw new Error(copy.unconfiguredError); } throw new Error(typeof data.error === "string" ? data.error : copy.genericError); }
+        if (!response.ok) {
+          if (data.code === "NOT_CONFIGURED") setLiveAvailable(false);
+          const messages: Record<string, string> = {
+            NOT_CONFIGURED: copy.unconfiguredError,
+            CONSENT_REQUIRED: copy.consentRequired,
+            INPUT_TOO_LARGE: copy.inputTooLong,
+            RATE_LIMITED: copy.rateLimitError,
+            TIMEOUT: copy.timeoutError,
+            SOURCE_VALIDATION_FAILED: copy.sourceValidationError,
+            PROVIDER_CONFIGURATION: copy.providerConfigError,
+            INVALID_OUTPUT: copy.invalidOutputError,
+            CANCELLED: copy.cancelError,
+            PROVIDER_ERROR: copy.providerError,
+          };
+          throw new Error(messages[String(data.code)] ?? copy.genericError);
+        }
         result = careMapAnalysisSchema.parse(data.analysis);
       }
       if (id !== requestId.current) return;
       setAnalysis(result); setMode(demo ? "demo" : "live"); setLanguage(nextLanguage); window.scrollTo({ top: 0 });
-    } catch (e) { if (id === requestId.current) setError(e instanceof Error && e.name !== "AbortError" ? e.message : copy.genericError); }
+    } catch (e) { if (id === requestId.current) setError(e instanceof Error && e.name === "AbortError" ? copy.timeoutError : e instanceof Error && !e.name.includes("Zod") ? e.message : copy.genericError); }
     finally { clearTimeout(timeout); if (id === requestId.current) { processing.current = false; setBusy(false); setPendingLanguage(null); } }
   }
   function changeLanguage(next: Language) { if (busy || next === language) return; setError(""); if (analysis && mode === "live") { void analyze(next); } else { setLanguage(next); if (analysis) setAnalysis(demoAnalyses[next]); } }
