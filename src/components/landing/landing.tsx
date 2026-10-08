@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, BookOpenText, Check, CheckCheck, ChevronRight, FileText, Languages, Link2, ListChecks, ShieldCheck, Sparkles, CalendarDays, ClipboardList } from "lucide-react";
 import { Header } from "@/components/shared/header";
@@ -11,12 +12,14 @@ import { SummaryCard } from "@/components/results/summary-card";
 import { ui } from "@/lib/translations";
 import { demoAnalyses } from "@/lib/demo-data";
 import type { Language } from "@/lib/schema";
+import "@/components/results/results.css";
 
 export function Landing() {
   const params = useSearchParams();
   const initialLanguage = params.get("lang");
   const [language, setLanguage] = useState<Language>(initialLanguage === "uz" || initialLanguage === "ru" ? initialLanguage : "en");
   const t = ui[language];
+  const reducedMotion = useReducedMotion();
   const demo = demoAnalyses[language];
   useEffect(() => { document.documentElement.lang = language; }, [language]);
   const appUrl = `/app?lang=${language}`;
@@ -51,7 +54,7 @@ export function Landing() {
               <Link href={demoUrl} className="preview-source-link"><Link2 size={14}/>{t.viewOriginal}<ChevronRight size={14}/></Link>
             </div>
           </div>
-          <div className="source-float"><span className="source-float-icon"><Link2 size={17}/></span><div><strong>{t.previewSource}</strong><p>“October 15, 2026, at 10:30 AM.”</p></div><span className="source-float-check"><Check size={13}/></span></div>
+          <motion.div className="source-float" whileHover={reducedMotion ? undefined : { y: -4 }} transition={{ duration: 0.2 }}><span className="source-float-icon"><Link2 size={17}/></span><div><strong>{t.previewSource}</strong><p>“October 15, 2026, at 10:30 AM.”</p></div><span className="source-float-check"><Check size={13}/></span></motion.div>
           <span className="visual-transformation" aria-hidden="true"><Sparkles size={18}/></span>
         </div>
       </section>

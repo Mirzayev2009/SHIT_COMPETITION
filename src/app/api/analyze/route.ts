@@ -9,7 +9,6 @@ import {
 import { analysisInputSchema, MAX_DOCUMENT_LENGTH } from "@/lib/schema";
 import { SourceValidationError } from "@/lib/source-validation";
 
-export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const MAX_REQUEST_BYTES = 128 * 1_024;
